@@ -12,6 +12,16 @@ Karaoke Infinity runs on Windows: paste a YouTube link, play the video, monitor 
 
 It also works from the terminal with `node server.js` if Node.js is installed.
 
+## Project structure
+
+- `server.js` serves the local app with basic static-file safety checks.
+- `public/js/app.js` coordinates the UI, YouTube player, microphone, and queue.
+- `public/js/i18n.js` contains the language catalog.
+- `public/js/scoring.js` contains the singing-score algorithm.
+- `public/js/youtube.js` contains YouTube loading and URL parsing helpers.
+
+Run `npm run check` to validate JavaScript syntax.
+
 ## Languages
 
 The interface starts in English and includes a language selector for English, Portuguese, Spanish, and Japanese.

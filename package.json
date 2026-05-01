@@ -4,6 +4,7 @@
   "private": true,
   "description": "Karaoke Infinity app with YouTube playback, microphone monitoring, and singing score.",
   "scripts": {
+    "check": "node tools/check-syntax.js",
     "start": "node server.js"
   }
 }
