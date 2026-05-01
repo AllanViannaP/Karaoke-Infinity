@@ -3,16 +3,16 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Local Karaoke</title>
+    <title>Karaoke Infinity</title>
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
         <div class="brand">
-          <div class="brand-mark" aria-hidden="true">K</div>
+          <div class="brand-mark" aria-hidden="true">∞</div>
           <div>
-            <h1 data-i18n="appTitle">Local Karaoke</h1>
+            <h1 data-i18n="appTitle">Karaoke Infinity</h1>
             <p id="playerStatus">Waiting for a YouTube link</p>
           </div>
         </div>
@@ -61,6 +61,39 @@
               <button class="ghost-button" id="clearQueue" type="button" data-i18n="clearQueueButton">Clear</button>
             </div>
             <ol class="queue-list" id="queueList"></ol>
+          </section>
+
+          <section class="score-panel" aria-label="Singing score" data-i18n-attr="aria-label:scoreAria">
+            <div class="panel-heading">
+              <h2 data-i18n="scoreHeading">Singing Score</h2>
+              <button class="ghost-button" id="resetScore" type="button" data-i18n="resetScoreButton">Reset</button>
+            </div>
+
+            <div class="score-display" id="scoreDisplay">
+              <div class="score-number" id="scoreValue">0</div>
+              <div class="score-grade" id="scoreGrade">Ready</div>
+            </div>
+
+            <dl class="score-stats">
+              <div>
+                <dt data-i18n="scorePowerLabel">Power</dt>
+                <dd id="scorePower">0%</dd>
+              </div>
+              <div>
+                <dt data-i18n="scorePitchLabel">Pitch</dt>
+                <dd id="scorePitch">0%</dd>
+              </div>
+              <div>
+                <dt data-i18n="scoreConsistencyLabel">Consistency</dt>
+                <dd id="scoreConsistency">0%</dd>
+              </div>
+              <div>
+                <dt data-i18n="scoreStreakLabel">Streak</dt>
+                <dd id="scoreStreak">0s</dd>
+              </div>
+            </dl>
+
+            <p class="score-note" id="scoreNote">Waiting for voice</p>
           </section>
 
           <section class="mic-panel">

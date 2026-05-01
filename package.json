@@ -1,8 +1,8 @@
 {
-  "name": "karaoke-local",
+  "name": "karaoke-infinity",
   "version": "1.0.0",
   "private": true,
-  "description": "Local karaoke app with YouTube playback and microphone monitoring.",
+  "description": "Karaoke Infinity app with YouTube playback, microphone monitoring, and singing score.",
   "scripts": {
     "start": "node server.js"
   }

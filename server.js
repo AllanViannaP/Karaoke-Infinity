@@ -70,6 +70,6 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Local Karaoke is ready at http://127.0.0.1:${port}`);
+  console.log(`Karaoke Infinity is ready at http://127.0.0.1:${port}`);
   console.log("Press Ctrl+C to close.");
 });

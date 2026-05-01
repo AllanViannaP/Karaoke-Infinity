@@ -18,11 +18,21 @@ const elements = {
   micDelay: document.querySelector("#micDelay"),
   micDelayValue: document.querySelector("#micDelayValue"),
   micMeter: document.querySelector("#micMeter"),
-  audioNote: document.querySelector("#audioNote")
+  audioNote: document.querySelector("#audioNote"),
+  resetScore: document.querySelector("#resetScore"),
+  scoreDisplay: document.querySelector("#scoreDisplay"),
+  scoreValue: document.querySelector("#scoreValue"),
+  scoreGrade: document.querySelector("#scoreGrade"),
+  scorePower: document.querySelector("#scorePower"),
+  scorePitch: document.querySelector("#scorePitch"),
+  scoreConsistency: document.querySelector("#scoreConsistency"),
+  scoreStreak: document.querySelector("#scoreStreak"),
+  scoreNote: document.querySelector("#scoreNote")
 };
 
 let player = null;
 let playerReady = false;
+let isVideoPlaying = false;
 let queuedVideos = [];
 let currentIndex = -1;
 let pendingVideoId = "";
@@ -33,13 +43,28 @@ let micSource = null;
 let micGain = null;
 let micDelay = null;
 let micAnalyser = null;
+let micScoreAnalyser = null;
 let meterFrame = 0;
+let lastScoreUpdate = 0;
 
 const meterCanvasContext = elements.micMeter.getContext("2d");
+const scoreBuffer = new Float32Array(2048);
+
+const scoreState = {
+  score: 0,
+  samples: 0,
+  power: 0,
+  pitch: 0,
+  consistency: 0,
+  streak: 0,
+  lastPitch: 0,
+  recentLevels: [],
+  recentPitches: []
+};
 
 const translations = {
   en: {
-    appTitle: "Local Karaoke",
+    appTitle: "Karaoke Infinity",
     languageLabel: "Language",
     stageAria: "Stage",
     videoControlsAria: "Video controls",
@@ -96,7 +121,7 @@ const translations = {
     noteMicOpenFailed: "Could not open the microphone."
   },
   pt: {
-    appTitle: "Karaoke Local",
+    appTitle: "Karaoke Infinity",
     languageLabel: "Idioma",
     stageAria: "Palco",
     videoControlsAria: "Controles de video",
@@ -153,7 +178,7 @@ const translations = {
     noteMicOpenFailed: "Nao foi possivel abrir o microfone."
   },
   es: {
-    appTitle: "Karaoke Local",
+    appTitle: "Karaoke Infinity",
     languageLabel: "Idioma",
     stageAria: "Escenario",
     videoControlsAria: "Controles de video",
@@ -275,6 +300,94 @@ const languageCodes = {
   ja: "ja"
 };
 
+Object.assign(translations.en, {
+  appTitle: "Karaoke Infinity",
+  scoreAria: "Singing score",
+  scoreHeading: "Singing Score",
+  resetScoreButton: "Reset",
+  scorePowerLabel: "Power",
+  scorePitchLabel: "Pitch",
+  scoreConsistencyLabel: "Consistency",
+  scoreStreakLabel: "Streak",
+  scoreSecondsSuffix: "s",
+  gradeReady: "Ready",
+  gradeWarmup: "Warmup",
+  gradeGood: "Good",
+  gradeGreat: "Great",
+  gradeStar: "Star",
+  gradeInfinity: "Infinity",
+  scoreNoteNoMic: "Microphone off",
+  scoreNotePaused: "Score paused",
+  scoreNoteLive: "Listening",
+  scoreNoteWaitingVoice: "Waiting for voice"
+});
+
+Object.assign(translations.pt, {
+  appTitle: "Karaoke Infinity",
+  scoreAria: "Pontuacao de canto",
+  scoreHeading: "Pontuacao de Canto",
+  resetScoreButton: "Reiniciar",
+  scorePowerLabel: "Potencia",
+  scorePitchLabel: "Afinacao",
+  scoreConsistencyLabel: "Consistencia",
+  scoreStreakLabel: "Sequencia",
+  scoreSecondsSuffix: "s",
+  gradeReady: "Pronto",
+  gradeWarmup: "Aquecendo",
+  gradeGood: "Bom",
+  gradeGreat: "Otimo",
+  gradeStar: "Estrela",
+  gradeInfinity: "Infinito",
+  scoreNoteNoMic: "Microfone desligado",
+  scoreNotePaused: "Placar pausado",
+  scoreNoteLive: "Ouvindo",
+  scoreNoteWaitingVoice: "Aguardando voz"
+});
+
+Object.assign(translations.es, {
+  appTitle: "Karaoke Infinity",
+  scoreAria: "Puntuacion de canto",
+  scoreHeading: "Puntuacion de Canto",
+  resetScoreButton: "Reiniciar",
+  scorePowerLabel: "Potencia",
+  scorePitchLabel: "Afinacion",
+  scoreConsistencyLabel: "Consistencia",
+  scoreStreakLabel: "Racha",
+  scoreSecondsSuffix: "s",
+  gradeReady: "Listo",
+  gradeWarmup: "Calentando",
+  gradeGood: "Bien",
+  gradeGreat: "Genial",
+  gradeStar: "Estrella",
+  gradeInfinity: "Infinito",
+  scoreNoteNoMic: "Microfono apagado",
+  scoreNotePaused: "Puntuacion en pausa",
+  scoreNoteLive: "Escuchando",
+  scoreNoteWaitingVoice: "Esperando voz"
+});
+
+Object.assign(translations.ja, {
+  appTitle: "Karaoke Infinity",
+  scoreAria: "歌唱スコア",
+  scoreHeading: "歌唱スコア",
+  resetScoreButton: "リセット",
+  scorePowerLabel: "声量",
+  scorePitchLabel: "音程",
+  scoreConsistencyLabel: "安定感",
+  scoreStreakLabel: "連続",
+  scoreSecondsSuffix: "秒",
+  gradeReady: "準備完了",
+  gradeWarmup: "ウォームアップ",
+  gradeGood: "グッド",
+  gradeGreat: "グレート",
+  gradeStar: "スター",
+  gradeInfinity: "インフィニティ",
+  scoreNoteNoMic: "マイクはオフです",
+  scoreNotePaused: "スコアは一時停止中",
+  scoreNoteLive: "リスニング中",
+  scoreNoteWaitingVoice: "声を待っています"
+});
+
 let currentLanguage = localStorage.getItem("karaokeLanguage") || "en";
 if (!translations[currentLanguage]) currentLanguage = "en";
 
@@ -309,6 +422,7 @@ function applyTranslations() {
   refreshPlayerStatus();
   refreshMicStatus();
   refreshAudioNote();
+  refreshScoreDisplay();
   renderQueue();
   loadAudioDevices();
 }
@@ -348,6 +462,160 @@ function setAudioNoteKey(key, vars = {}) {
 
 function refreshAudioNote() {
   elements.audioNote.textContent = translate(audioNoteState.key, audioNoteState.vars);
+}
+
+function clamp(value, min = 0, max = 1) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function resetScore() {
+  scoreState.score = 0;
+  scoreState.samples = 0;
+  scoreState.power = 0;
+  scoreState.pitch = 0;
+  scoreState.consistency = 0;
+  scoreState.streak = 0;
+  scoreState.lastPitch = 0;
+  scoreState.recentLevels = [];
+  scoreState.recentPitches = [];
+  refreshScoreDisplay();
+}
+
+function getScoreGradeKey(score) {
+  if (!scoreState.samples) return "gradeReady";
+  if (score >= 92) return "gradeInfinity";
+  if (score >= 82) return "gradeStar";
+  if (score >= 70) return "gradeGreat";
+  if (score >= 55) return "gradeGood";
+  return "gradeWarmup";
+}
+
+function getScoreNoteKey() {
+  if (!micStream) return "scoreNoteNoMic";
+  if (!isVideoPlaying) return "scoreNotePaused";
+  if (scoreState.power < 8) return "scoreNoteWaitingVoice";
+  return "scoreNoteLive";
+}
+
+function refreshScoreDisplay() {
+  const score = Math.round(clamp(scoreState.score, 0, 100));
+  elements.scoreValue.textContent = String(score);
+  elements.scoreGrade.textContent = translate(getScoreGradeKey(score));
+  elements.scorePower.textContent = `${Math.round(clamp(scoreState.power, 0, 100))}%`;
+  elements.scorePitch.textContent = `${Math.round(clamp(scoreState.pitch, 0, 100))}%`;
+  elements.scoreConsistency.textContent = `${Math.round(clamp(scoreState.consistency, 0, 100))}%`;
+  elements.scoreStreak.textContent = `${Math.round(scoreState.streak)}${translate("scoreSecondsSuffix")}`;
+  elements.scoreNote.textContent = translate(getScoreNoteKey());
+  elements.scoreDisplay.style.setProperty("--score-percent", `${score}%`);
+}
+
+function calculateRms(buffer) {
+  let sum = 0;
+  for (let index = 0; index < buffer.length; index += 1) {
+    sum += buffer[index] * buffer[index];
+  }
+  return Math.sqrt(sum / buffer.length);
+}
+
+function detectPitch(buffer, sampleRate, rms) {
+  if (rms < 0.012) return { frequency: 0, confidence: 0 };
+
+  const minLag = Math.floor(sampleRate / 1000);
+  const maxLag = Math.min(Math.floor(sampleRate / 70), buffer.length - 1);
+  let bestLag = 0;
+  let bestCorrelation = 0;
+
+  for (let lag = minLag; lag <= maxLag; lag += 1) {
+    let correlation = 0;
+    let leftEnergy = 0;
+    let rightEnergy = 0;
+    const limit = buffer.length - lag;
+
+    for (let index = 0; index < limit; index += 1) {
+      const left = buffer[index];
+      const right = buffer[index + lag];
+      correlation += left * right;
+      leftEnergy += left * left;
+      rightEnergy += right * right;
+    }
+
+    const normalized = correlation / Math.sqrt(leftEnergy * rightEnergy || 1);
+    if (normalized > bestCorrelation) {
+      bestCorrelation = normalized;
+      bestLag = lag;
+    }
+  }
+
+  if (!bestLag || bestCorrelation < 0.36) {
+    return { frequency: 0, confidence: clamp(bestCorrelation) };
+  }
+
+  return {
+    frequency: sampleRate / bestLag,
+    confidence: clamp((bestCorrelation - 0.36) / 0.42)
+  };
+}
+
+function average(values) {
+  if (!values.length) return 0;
+  return values.reduce((total, value) => total + value, 0) / values.length;
+}
+
+function updateSingingScore(now = performance.now()) {
+  if (!micScoreAnalyser || !audioContext || now - lastScoreUpdate < 120) return;
+  lastScoreUpdate = now;
+
+  if (!isVideoPlaying) {
+    scoreState.streak = 0;
+    refreshScoreDisplay();
+    return;
+  }
+
+  micScoreAnalyser.getFloatTimeDomainData(scoreBuffer);
+  const rms = calculateRms(scoreBuffer);
+  const voiceLevel = clamp((rms - 0.012) / 0.18);
+  const hasVoice = voiceLevel > 0.07;
+
+  if (!hasVoice) {
+    scoreState.power *= 0.86;
+    scoreState.pitch *= 0.9;
+    scoreState.consistency *= 0.92;
+    scoreState.streak = 0;
+    refreshScoreDisplay();
+    return;
+  }
+
+  const pitch = detectPitch(scoreBuffer, audioContext.sampleRate, rms);
+  const idealPower = clamp(1 - Math.abs(voiceLevel - 0.56) / 0.56);
+  let pitchScore = pitch.confidence;
+
+  if (pitch.frequency && scoreState.lastPitch) {
+    const cents = Math.abs(1200 * Math.log2(pitch.frequency / scoreState.lastPitch));
+    pitchScore = pitchScore * 0.6 + clamp(1 - Math.min(cents, 260) / 260) * 0.4;
+  }
+
+  if (pitch.frequency) scoreState.lastPitch = pitch.frequency;
+
+  scoreState.recentLevels.push(voiceLevel);
+  scoreState.recentPitches.push(pitch.frequency ? 1 : 0);
+  if (scoreState.recentLevels.length > 36) scoreState.recentLevels.shift();
+  if (scoreState.recentPitches.length > 36) scoreState.recentPitches.shift();
+
+  const levelAverage = average(scoreState.recentLevels);
+  const levelVariance = average(scoreState.recentLevels.map((level) => (level - levelAverage) ** 2));
+  const levelConsistency = clamp(1 - Math.sqrt(levelVariance) / 0.22);
+  const pitchPresence = average(scoreState.recentPitches);
+  const consistencyScore = levelConsistency * 0.65 + pitchPresence * 0.35;
+  const sampleScore = (idealPower * 0.4 + pitchScore * 0.25 + consistencyScore * 0.35) * 100;
+
+  scoreState.samples += 1;
+  scoreState.score = scoreState.samples === 1 ? sampleScore : scoreState.score * 0.92 + sampleScore * 0.08;
+  scoreState.power = scoreState.power * 0.68 + voiceLevel * 100 * 0.32;
+  scoreState.pitch = scoreState.pitch * 0.72 + pitchScore * 100 * 0.28;
+  scoreState.consistency = scoreState.consistency * 0.72 + consistencyScore * 100 * 0.28;
+  scoreState.streak = sampleScore >= 64 ? scoreState.streak + 0.12 : 0;
+
+  refreshScoreDisplay();
 }
 
 window.onYouTubeIframeAPIReady = () => {
@@ -465,7 +733,9 @@ function removeQueueIndex(index) {
 function playQueueIndex(index) {
   if (!queuedVideos[index]) return;
 
+  const isNewSelection = currentIndex !== index;
   currentIndex = index;
+  if (isNewSelection) resetScore();
   renderQueue();
   playVideoById(queuedVideos[index].id);
 }
@@ -478,6 +748,7 @@ function playVideoById(videoId) {
   }
 
   pendingVideoId = "";
+  isVideoPlaying = false;
   player.loadVideoById(videoId);
   setPlayerStatusKey("playerLoadingVideo");
   window.setTimeout(updateCurrentTitle, 1000);
@@ -498,11 +769,23 @@ function onPlayerStateChange(event) {
   if (!window.YT || !YT.PlayerState) return;
 
   if (event.data === YT.PlayerState.PLAYING) {
+    isVideoPlaying = true;
     updateCurrentTitle();
+    refreshScoreDisplay();
   }
 
   if (event.data === YT.PlayerState.ENDED) {
+    isVideoPlaying = false;
     playNextVideo();
+  }
+
+  if (
+    event.data === YT.PlayerState.PAUSED ||
+    event.data === YT.PlayerState.BUFFERING ||
+    event.data === YT.PlayerState.CUED
+  ) {
+    isVideoPlaying = false;
+    refreshScoreDisplay();
   }
 }
 
@@ -561,8 +844,11 @@ elements.prevVideo.addEventListener("click", playPreviousVideo);
 elements.clearQueue.addEventListener("click", () => {
   queuedVideos = [];
   currentIndex = -1;
+  resetScore();
   renderQueue();
 });
+
+elements.resetScore.addEventListener("click", resetScore);
 
 async function loadAudioDevices() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
@@ -661,12 +947,16 @@ async function startMicrophone() {
     micDelay = audioContext.createDelay(0.25);
     micGain = audioContext.createGain();
     micAnalyser = audioContext.createAnalyser();
+    micScoreAnalyser = audioContext.createAnalyser();
     micAnalyser.fftSize = 256;
     micAnalyser.smoothingTimeConstant = 0.82;
+    micScoreAnalyser.fftSize = 2048;
+    micScoreAnalyser.smoothingTimeConstant = 0;
 
     micSource.connect(micDelay);
     micDelay.connect(micGain);
     micGain.connect(micAnalyser);
+    micGain.connect(micScoreAnalyser);
     micAnalyser.connect(audioContext.destination);
 
     applyMicSettings();
@@ -675,6 +965,7 @@ async function startMicrophone() {
 
     setMicStatusKey("micOn", true);
     setAudioNoteKey("noteFeedbackWarning");
+    refreshScoreDisplay();
     drawMeter();
   } catch (error) {
     stopMicrophone();
@@ -693,6 +984,7 @@ function stopMicrophone() {
   if (micDelay) micDelay.disconnect();
   if (micGain) micGain.disconnect();
   if (micAnalyser) micAnalyser.disconnect();
+  if (micScoreAnalyser) micScoreAnalyser.disconnect();
 
   if (micStream) {
     micStream.getTracks().forEach((track) => track.stop());
@@ -708,8 +1000,11 @@ function stopMicrophone() {
   micDelay = null;
   micGain = null;
   micAnalyser = null;
+  micScoreAnalyser = null;
+  scoreState.streak = 0;
 
   setMicStatusKey("micOff");
+  refreshScoreDisplay();
   drawIdleMeter();
 }
 
@@ -749,6 +1044,7 @@ function drawMeter() {
     meterCanvasContext.fillRect(x, y, barWidth, barHeight);
   });
 
+  updateSingingScore();
   meterFrame = requestAnimationFrame(drawMeter);
 }
 
