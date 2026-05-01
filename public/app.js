@@ -1,6 +1,7 @@
 const elements = {
   youtubeForm: document.querySelector("#youtubeForm"),
   youtubeUrl: document.querySelector("#youtubeUrl"),
+  languageSelect: document.querySelector("#languageSelect"),
   playerStatus: document.querySelector("#playerStatus"),
   prevVideo: document.querySelector("#prevVideo"),
   playVideo: document.querySelector("#playVideo"),
@@ -36,6 +37,319 @@ let meterFrame = 0;
 
 const meterCanvasContext = elements.micMeter.getContext("2d");
 
+const translations = {
+  en: {
+    appTitle: "Local Karaoke",
+    languageLabel: "Language",
+    stageAria: "Stage",
+    videoControlsAria: "Video controls",
+    sidePanelAria: "Queue and microphone",
+    youtubeLinkLabel: "YouTube link",
+    playNowButton: "Play",
+    previousButton: "Previous",
+    previousTitle: "Previous video",
+    playButton: "Play",
+    playTitle: "Play video",
+    pauseButton: "Pause",
+    pauseTitle: "Pause video",
+    nextButton: "Next",
+    nextTitle: "Next video",
+    queueHeading: "Queue",
+    clearQueueButton: "Clear",
+    microphoneHeading: "Microphone",
+    inputLabel: "Input",
+    outputLabel: "Output",
+    gainLabel: "Gain",
+    delayLabel: "Delay",
+    micMeterAria: "Microphone level",
+    queueEmpty: "No songs in the queue",
+    videoFallbackTitle: "Video {id}",
+    queuePlayTitle: "Play this video",
+    queueRemoveTitle: "Remove from queue",
+    queuePlayButton: "Play",
+    queueRemoveButton: "Remove",
+    playerWaiting: "Waiting for a YouTube link",
+    playerReady: "Ready to play",
+    playerLoadingApi: "Loading YouTube player",
+    playerLoadingVideo: "Loading video",
+    invalidUrl: "Paste a valid YouTube link",
+    videoError2: "Invalid link",
+    videoError5: "This video cannot play in the HTML player",
+    videoError100: "Video unavailable",
+    videoErrorEmbed: "This video blocks embedded playback",
+    videoErrorDefault: "Could not play this video",
+    micOff: "Microphone off",
+    micOn: "Microphone on",
+    micUnavailable: "Microphone unavailable",
+    micPermissionDenied: "Microphone permission denied",
+    turnMicOn: "Turn on",
+    turnMicOff: "Turn off",
+    inputUnavailable: "Microphone unavailable",
+    inputFallback: "Microphone {index}",
+    outputDefault: "Default output",
+    outputFallback: "Output {index}",
+    noteDefaultOutput: "Use the Windows default output to choose the speaker.",
+    noteBrowserDefault: "This browser uses the system default output.",
+    noteOutputSelected: "Audio output selected.",
+    noteOutputFailed: "Could not switch the audio output.",
+    noteFeedbackWarning: "Watch for feedback. Lower the gain if the sound starts ringing.",
+    noteMicOpenFailed: "Could not open the microphone."
+  },
+  pt: {
+    appTitle: "Karaoke Local",
+    languageLabel: "Idioma",
+    stageAria: "Palco",
+    videoControlsAria: "Controles de video",
+    sidePanelAria: "Fila e microfone",
+    youtubeLinkLabel: "Link do YouTube",
+    playNowButton: "Tocar",
+    previousButton: "Anterior",
+    previousTitle: "Video anterior",
+    playButton: "Tocar",
+    playTitle: "Tocar video",
+    pauseButton: "Pausar",
+    pauseTitle: "Pausar video",
+    nextButton: "Proximo",
+    nextTitle: "Proximo video",
+    queueHeading: "Fila",
+    clearQueueButton: "Limpar",
+    microphoneHeading: "Microfone",
+    inputLabel: "Entrada",
+    outputLabel: "Saida",
+    gainLabel: "Ganho",
+    delayLabel: "Atraso",
+    micMeterAria: "Nivel do microfone",
+    queueEmpty: "Nenhuma musica na fila",
+    videoFallbackTitle: "Video {id}",
+    queuePlayTitle: "Tocar este video",
+    queueRemoveTitle: "Remover da fila",
+    queuePlayButton: "Tocar",
+    queueRemoveButton: "Remover",
+    playerWaiting: "Aguardando link do YouTube",
+    playerReady: "Pronto para tocar",
+    playerLoadingApi: "Carregando player do YouTube",
+    playerLoadingVideo: "Carregando video",
+    invalidUrl: "Cole um link valido do YouTube",
+    videoError2: "Link invalido",
+    videoError5: "Esse video nao pode tocar no player HTML",
+    videoError100: "Video indisponivel",
+    videoErrorEmbed: "Esse video bloqueia incorporacao",
+    videoErrorDefault: "Nao foi possivel tocar esse video",
+    micOff: "Microfone desligado",
+    micOn: "Microfone ligado",
+    micUnavailable: "Microfone indisponivel",
+    micPermissionDenied: "Permissao do microfone negada",
+    turnMicOn: "Ligar",
+    turnMicOff: "Desligar",
+    inputUnavailable: "Microfone indisponivel",
+    inputFallback: "Microfone {index}",
+    outputDefault: "Saida padrao",
+    outputFallback: "Saida {index}",
+    noteDefaultOutput: "Use a saida padrao do Windows para escolher o alto-falante.",
+    noteBrowserDefault: "Este navegador usa a saida padrao do sistema.",
+    noteOutputSelected: "Saida de audio selecionada.",
+    noteOutputFailed: "Nao foi possivel trocar a saida de audio.",
+    noteFeedbackWarning: "Cuidado com retorno. Baixe o ganho se o som apitar.",
+    noteMicOpenFailed: "Nao foi possivel abrir o microfone."
+  },
+  es: {
+    appTitle: "Karaoke Local",
+    languageLabel: "Idioma",
+    stageAria: "Escenario",
+    videoControlsAria: "Controles de video",
+    sidePanelAria: "Cola y microfono",
+    youtubeLinkLabel: "Enlace de YouTube",
+    playNowButton: "Reproducir",
+    previousButton: "Anterior",
+    previousTitle: "Video anterior",
+    playButton: "Reproducir",
+    playTitle: "Reproducir video",
+    pauseButton: "Pausar",
+    pauseTitle: "Pausar video",
+    nextButton: "Siguiente",
+    nextTitle: "Siguiente video",
+    queueHeading: "Cola",
+    clearQueueButton: "Limpiar",
+    microphoneHeading: "Microfono",
+    inputLabel: "Entrada",
+    outputLabel: "Salida",
+    gainLabel: "Ganancia",
+    delayLabel: "Retraso",
+    micMeterAria: "Nivel del microfono",
+    queueEmpty: "No hay canciones en la cola",
+    videoFallbackTitle: "Video {id}",
+    queuePlayTitle: "Reproducir este video",
+    queueRemoveTitle: "Quitar de la cola",
+    queuePlayButton: "Reproducir",
+    queueRemoveButton: "Quitar",
+    playerWaiting: "Esperando un enlace de YouTube",
+    playerReady: "Listo para reproducir",
+    playerLoadingApi: "Cargando reproductor de YouTube",
+    playerLoadingVideo: "Cargando video",
+    invalidUrl: "Pega un enlace valido de YouTube",
+    videoError2: "Enlace invalido",
+    videoError5: "Este video no puede reproducirse en el reproductor HTML",
+    videoError100: "Video no disponible",
+    videoErrorEmbed: "Este video bloquea la reproduccion incorporada",
+    videoErrorDefault: "No se pudo reproducir este video",
+    micOff: "Microfono apagado",
+    micOn: "Microfono encendido",
+    micUnavailable: "Microfono no disponible",
+    micPermissionDenied: "Permiso de microfono denegado",
+    turnMicOn: "Encender",
+    turnMicOff: "Apagar",
+    inputUnavailable: "Microfono no disponible",
+    inputFallback: "Microfono {index}",
+    outputDefault: "Salida predeterminada",
+    outputFallback: "Salida {index}",
+    noteDefaultOutput: "Usa la salida predeterminada de Windows para elegir el altavoz.",
+    noteBrowserDefault: "Este navegador usa la salida predeterminada del sistema.",
+    noteOutputSelected: "Salida de audio seleccionada.",
+    noteOutputFailed: "No se pudo cambiar la salida de audio.",
+    noteFeedbackWarning: "Cuidado con la retroalimentacion. Baja la ganancia si el sonido empieza a silbar.",
+    noteMicOpenFailed: "No se pudo abrir el microfono."
+  },
+  ja: {
+    appTitle: "ローカルカラオケ",
+    languageLabel: "言語",
+    stageAria: "ステージ",
+    videoControlsAria: "動画コントロール",
+    sidePanelAria: "キューとマイク",
+    youtubeLinkLabel: "YouTubeリンク",
+    playNowButton: "再生",
+    previousButton: "前へ",
+    previousTitle: "前の動画",
+    playButton: "再生",
+    playTitle: "動画を再生",
+    pauseButton: "一時停止",
+    pauseTitle: "動画を一時停止",
+    nextButton: "次へ",
+    nextTitle: "次の動画",
+    queueHeading: "キュー",
+    clearQueueButton: "クリア",
+    microphoneHeading: "マイク",
+    inputLabel: "入力",
+    outputLabel: "出力",
+    gainLabel: "ゲイン",
+    delayLabel: "遅延",
+    micMeterAria: "マイクレベル",
+    queueEmpty: "キューに曲がありません",
+    videoFallbackTitle: "動画 {id}",
+    queuePlayTitle: "この動画を再生",
+    queueRemoveTitle: "キューから削除",
+    queuePlayButton: "再生",
+    queueRemoveButton: "削除",
+    playerWaiting: "YouTubeリンクを待っています",
+    playerReady: "再生準備完了",
+    playerLoadingApi: "YouTubeプレイヤーを読み込み中",
+    playerLoadingVideo: "動画を読み込み中",
+    invalidUrl: "有効なYouTubeリンクを貼り付けてください",
+    videoError2: "無効なリンクです",
+    videoError5: "この動画はHTMLプレイヤーで再生できません",
+    videoError100: "動画を利用できません",
+    videoErrorEmbed: "この動画は埋め込み再生をブロックしています",
+    videoErrorDefault: "この動画を再生できませんでした",
+    micOff: "マイクはオフです",
+    micOn: "マイクはオンです",
+    micUnavailable: "マイクを利用できません",
+    micPermissionDenied: "マイクの許可が拒否されました",
+    turnMicOn: "オン",
+    turnMicOff: "オフ",
+    inputUnavailable: "マイクを利用できません",
+    inputFallback: "マイク {index}",
+    outputDefault: "既定の出力",
+    outputFallback: "出力 {index}",
+    noteDefaultOutput: "スピーカーを選ぶにはWindowsの既定の出力を使用してください。",
+    noteBrowserDefault: "このブラウザーはシステムの既定の出力を使用します。",
+    noteOutputSelected: "音声出力を選択しました。",
+    noteOutputFailed: "音声出力を切り替えられませんでした。",
+    noteFeedbackWarning: "ハウリングに注意してください。音が鳴り始めたらゲインを下げてください。",
+    noteMicOpenFailed: "マイクを開けませんでした。"
+  }
+};
+
+const languageCodes = {
+  en: "en",
+  pt: "pt-BR",
+  es: "es",
+  ja: "ja"
+};
+
+let currentLanguage = localStorage.getItem("karaokeLanguage") || "en";
+if (!translations[currentLanguage]) currentLanguage = "en";
+
+let playerStatusState = { type: "key", key: "playerWaiting", vars: {} };
+let micStatusState = { key: "micOff", vars: {}, isLive: false };
+let audioNoteState = { key: "noteDefaultOutput", vars: {} };
+
+function translate(key, vars = {}) {
+  const catalog = translations[currentLanguage] || translations.en;
+  const template = catalog[key] || translations.en[key] || key;
+  return template.replace(/\{(\w+)\}/g, (_, name) => String(vars[name] ?? ""));
+}
+
+function applyTranslations() {
+  document.documentElement.lang = languageCodes[currentLanguage] || "en";
+  document.title = translate("appTitle");
+  elements.languageSelect.value = currentLanguage;
+  elements.languageSelect.setAttribute("aria-label", translate("languageLabel"));
+
+  document.querySelectorAll("[data-i18n]").forEach((node) => {
+    node.textContent = translate(node.dataset.i18n);
+  });
+
+  document.querySelectorAll("[data-i18n-attr]").forEach((node) => {
+    node.dataset.i18nAttr.split(";").forEach((pair) => {
+      const [attribute, key] = pair.split(":").map((part) => part.trim());
+      if (attribute && key) node.setAttribute(attribute, translate(key));
+    });
+  });
+
+  elements.queueList.dataset.empty = translate("queueEmpty");
+  refreshPlayerStatus();
+  refreshMicStatus();
+  refreshAudioNote();
+  renderQueue();
+  loadAudioDevices();
+}
+
+function setPlayerStatusKey(key, vars = {}) {
+  playerStatusState = { type: "key", key, vars };
+  refreshPlayerStatus();
+}
+
+function setPlayerStatusText(text) {
+  playerStatusState = { type: "text", text };
+  refreshPlayerStatus();
+}
+
+function refreshPlayerStatus() {
+  elements.playerStatus.textContent =
+    playerStatusState.type === "text"
+      ? playerStatusState.text
+      : translate(playerStatusState.key, playerStatusState.vars);
+}
+
+function setMicStatusKey(key, isLive = false, vars = {}) {
+  micStatusState = { key, vars, isLive };
+  refreshMicStatus();
+}
+
+function refreshMicStatus() {
+  elements.micStatus.textContent = translate(micStatusState.key, micStatusState.vars);
+  elements.micStatus.classList.toggle("is-live", micStatusState.isLive);
+  elements.toggleMic.textContent = translate(micStream ? "turnMicOff" : "turnMicOn");
+}
+
+function setAudioNoteKey(key, vars = {}) {
+  audioNoteState = { key, vars };
+  refreshAudioNote();
+}
+
+function refreshAudioNote() {
+  elements.audioNote.textContent = translate(audioNoteState.key, audioNoteState.vars);
+}
+
 window.onYouTubeIframeAPIReady = () => {
   player = new YT.Player("player", {
     width: "100%",
@@ -51,7 +365,7 @@ window.onYouTubeIframeAPIReady = () => {
     events: {
       onReady: () => {
         playerReady = true;
-        setPlayerStatus("Pronto para tocar");
+        setPlayerStatusKey("playerReady");
         if (pendingVideoId) playVideoById(pendingVideoId);
       },
       onStateChange: onPlayerStateChange,
@@ -59,10 +373,6 @@ window.onYouTubeIframeAPIReady = () => {
     }
   });
 };
-
-function setPlayerStatus(message) {
-  elements.playerStatus.textContent = message;
-}
 
 function parseYouTubeVideoId(value) {
   const raw = value.trim();
@@ -105,7 +415,7 @@ function addVideoToQueue(videoId, originalUrl) {
   queuedVideos.push({
     id: videoId,
     url: originalUrl,
-    title: `Video ${videoId}`
+    title: translate("videoFallbackTitle", { id: videoId })
   });
   renderQueue();
   return queuedVideos.length - 1;
@@ -129,14 +439,14 @@ function renderQueue() {
 
     const playButton = document.createElement("button");
     playButton.type = "button";
-    playButton.title = "Tocar este video";
-    playButton.textContent = "Play";
+    playButton.title = translate("queuePlayTitle");
+    playButton.textContent = translate("queuePlayButton");
     playButton.addEventListener("click", () => playQueueIndex(index));
 
     const removeButton = document.createElement("button");
     removeButton.type = "button";
-    removeButton.title = "Remover da fila";
-    removeButton.textContent = "X";
+    removeButton.title = translate("queueRemoveTitle");
+    removeButton.textContent = translate("queueRemoveButton");
     removeButton.addEventListener("click", () => removeQueueIndex(index));
 
     title.append(strong, span);
@@ -163,13 +473,13 @@ function playQueueIndex(index) {
 function playVideoById(videoId) {
   if (!playerReady || !player) {
     pendingVideoId = videoId;
-    setPlayerStatus("Carregando player do YouTube");
+    setPlayerStatusKey("playerLoadingApi");
     return;
   }
 
   pendingVideoId = "";
   player.loadVideoById(videoId);
-  setPlayerStatus("Carregando video");
+  setPlayerStatusKey("playerLoadingVideo");
   window.setTimeout(updateCurrentTitle, 1000);
 }
 
@@ -179,7 +489,7 @@ function updateCurrentTitle() {
   const data = player.getVideoData ? player.getVideoData() : null;
   if (data && data.title) {
     queuedVideos[currentIndex].title = data.title;
-    setPlayerStatus(data.title);
+    setPlayerStatusText(data.title);
     renderQueue();
   }
 }
@@ -198,13 +508,13 @@ function onPlayerStateChange(event) {
 
 function onPlayerError(event) {
   const errorMessages = {
-    2: "Link invalido",
-    5: "Esse video nao pode tocar no player HTML",
-    100: "Video indisponivel",
-    101: "Esse video bloqueia incorporacao",
-    150: "Esse video bloqueia incorporacao"
+    2: "videoError2",
+    5: "videoError5",
+    100: "videoError100",
+    101: "videoErrorEmbed",
+    150: "videoErrorEmbed"
   };
-  setPlayerStatus(errorMessages[event.data] || "Nao foi possivel tocar esse video");
+  setPlayerStatusKey(errorMessages[event.data] || "videoErrorDefault");
 }
 
 function playNextVideo() {
@@ -227,7 +537,7 @@ elements.youtubeForm.addEventListener("submit", (event) => {
   const videoId = parseYouTubeVideoId(url);
 
   if (!videoId) {
-    setPlayerStatus("Cole um link valido do YouTube");
+    setPlayerStatusKey("invalidUrl");
     elements.youtubeUrl.select();
     return;
   }
@@ -254,15 +564,10 @@ elements.clearQueue.addEventListener("click", () => {
   renderQueue();
 });
 
-function setMicStatus(message, isLive = false) {
-  elements.micStatus.textContent = message;
-  elements.micStatus.classList.toggle("is-live", isLive);
-}
-
 async function loadAudioDevices() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-    elements.micDevice.innerHTML = '<option value="">Microfone indisponivel</option>';
-    elements.outputDevice.innerHTML = '<option value="">Saida padrao</option>';
+    elements.micDevice.innerHTML = `<option value="">${translate("inputUnavailable")}</option>`;
+    elements.outputDevice.innerHTML = `<option value="">${translate("outputDefault")}</option>`;
     return;
   }
 
@@ -277,19 +582,19 @@ async function loadAudioDevices() {
   inputs.forEach((device, index) => {
     const option = document.createElement("option");
     option.value = device.deviceId;
-    option.textContent = device.label || `Microfone ${index + 1}`;
+    option.textContent = device.label || translate("inputFallback", { index: index + 1 });
     elements.micDevice.appendChild(option);
   });
 
   if (!inputs.length) {
-    elements.micDevice.innerHTML = '<option value="">Microfone indisponivel</option>';
+    elements.micDevice.innerHTML = `<option value="">${translate("inputUnavailable")}</option>`;
   }
 
-  elements.outputDevice.innerHTML = '<option value="">Saida padrao</option>';
+  elements.outputDevice.innerHTML = `<option value="">${translate("outputDefault")}</option>`;
   outputs.forEach((device, index) => {
     const option = document.createElement("option");
     option.value = device.deviceId;
-    option.textContent = device.label || `Saida ${index + 1}`;
+    option.textContent = device.label || translate("outputFallback", { index: index + 1 });
     elements.outputDevice.appendChild(option);
   });
 
@@ -317,21 +622,21 @@ async function setOutputDevice() {
   if (!audioContext || !elements.outputDevice.value) return;
 
   if (typeof audioContext.setSinkId !== "function") {
-    elements.audioNote.textContent = "Este navegador usa a saida padrao do sistema.";
+    setAudioNoteKey("noteBrowserDefault");
     return;
   }
 
   try {
     await audioContext.setSinkId(elements.outputDevice.value);
-    elements.audioNote.textContent = "Saida de audio selecionada.";
+    setAudioNoteKey("noteOutputSelected");
   } catch {
-    elements.audioNote.textContent = "Nao foi possivel trocar a saida de audio.";
+    setAudioNoteKey("noteOutputFailed");
   }
 }
 
 async function startMicrophone() {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    setMicStatus("Microfone indisponivel");
+    setMicStatusKey("micUnavailable");
     return;
   }
 
@@ -368,14 +673,13 @@ async function startMicrophone() {
     await setOutputDevice();
     await loadAudioDevices();
 
-    elements.toggleMic.textContent = "Desligar";
-    setMicStatus("Microfone ligado", true);
-    elements.audioNote.textContent = "Cuidado com retorno. Baixe o ganho se o som apitar.";
+    setMicStatusKey("micOn", true);
+    setAudioNoteKey("noteFeedbackWarning");
     drawMeter();
   } catch (error) {
     stopMicrophone();
-    setMicStatus("Permissao do microfone negada");
-    elements.audioNote.textContent = error.message || "Nao foi possivel abrir o microfone.";
+    setMicStatusKey("micPermissionDenied");
+    setAudioNoteKey("noteMicOpenFailed");
   }
 }
 
@@ -405,8 +709,7 @@ function stopMicrophone() {
   micGain = null;
   micAnalyser = null;
 
-  elements.toggleMic.textContent = "Ligar";
-  setMicStatus("Microfone desligado");
+  setMicStatusKey("micOff");
   drawIdleMeter();
 }
 
@@ -463,7 +766,12 @@ elements.micDevice.addEventListener("change", () => {
   if (micStream) startMicrophone();
 });
 elements.outputDevice.addEventListener("change", setOutputDevice);
+elements.languageSelect.addEventListener("change", () => {
+  currentLanguage = elements.languageSelect.value;
+  localStorage.setItem("karaokeLanguage", currentLanguage);
+  applyTranslations();
+});
 
+applyTranslations();
 applyMicSettings();
 drawIdleMeter();
-loadAudioDevices();

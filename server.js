@@ -27,7 +27,7 @@ function send(res, status, body, type = "text/plain; charset=utf-8") {
 
 const server = http.createServer((req, res) => {
   if (!["GET", "HEAD"].includes(req.method)) {
-    send(res, 405, "Metodo nao permitido");
+    send(res, 405, "Method not allowed");
     return;
   }
 
@@ -36,7 +36,7 @@ const server = http.createServer((req, res) => {
     const url = new URL(req.url, `http://${req.headers.host || "localhost"}`);
     pathname = decodeURIComponent(url.pathname);
   } catch {
-    send(res, 400, "URL invalida");
+    send(res, 400, "Invalid URL");
     return;
   }
 
@@ -44,13 +44,13 @@ const server = http.createServer((req, res) => {
 
   const requestedPath = path.normalize(path.join(publicDir, pathname));
   if (!requestedPath.startsWith(publicDir)) {
-    send(res, 403, "Acesso negado");
+    send(res, 403, "Access denied");
     return;
   }
 
   fs.stat(requestedPath, (statError, stat) => {
     if (statError || !stat.isFile()) {
-      send(res, 404, "Arquivo nao encontrado");
+      send(res, 404, "File not found");
       return;
     }
 
@@ -70,7 +70,6 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(port, "127.0.0.1", () => {
-  console.log(`Karaoke local pronto em http://127.0.0.1:${port}`);
-  console.log("Pressione Ctrl+C para fechar.");
+  console.log(`Local Karaoke is ready at http://127.0.0.1:${port}`);
+  console.log("Press Ctrl+C to close.");
 });
-
