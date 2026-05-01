@@ -1,0 +1,9 @@
+{
+  "name": "karaoke-local",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Programa local de karaoke com YouTube e retorno de microfone.",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

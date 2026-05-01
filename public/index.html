@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Karaoke Local</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">K</div>
+          <div>
+            <h1>Karaoke Local</h1>
+            <p id="playerStatus">Aguardando link do YouTube</p>
+          </div>
+        </div>
+        <div class="status-pill" id="micStatus">Microfone desligado</div>
+      </header>
+
+      <main class="workspace">
+        <section class="stage-panel" aria-label="Palco">
+          <div class="player-frame">
+            <div id="player"></div>
+          </div>
+
+          <div class="transport-panel">
+            <form class="url-form" id="youtubeForm">
+              <label class="field-label" for="youtubeUrl">Link do YouTube</label>
+              <div class="url-row">
+                <input id="youtubeUrl" name="youtubeUrl" type="url" inputmode="url" autocomplete="off" placeholder="https://www.youtube.com/watch?v=..." required>
+                <button class="primary-button" type="submit">Tocar</button>
+              </div>
+            </form>
+
+            <div class="transport-row" aria-label="Controles de video">
+              <button class="tool-button" id="prevVideo" type="button" title="Video anterior">Anterior</button>
+              <button class="tool-button" id="playVideo" type="button" title="Tocar video">Play</button>
+              <button class="tool-button" id="pauseVideo" type="button" title="Pausar video">Pausar</button>
+              <button class="tool-button" id="nextVideo" type="button" title="Proximo video">Proximo</button>
+            </div>
+          </div>
+        </section>
+
+        <aside class="side-panel" aria-label="Fila e microfone">
+          <section class="queue-panel">
+            <div class="panel-heading">
+              <h2>Fila</h2>
+              <button class="ghost-button" id="clearQueue" type="button">Limpar</button>
+            </div>
+            <ol class="queue-list" id="queueList"></ol>
+          </section>
+
+          <section class="mic-panel">
+            <div class="panel-heading">
+              <h2>Microfone</h2>
+              <button class="primary-button" id="toggleMic" type="button">Ligar</button>
+            </div>
+
+            <label class="field-label" for="micDevice">Entrada</label>
+            <select id="micDevice"></select>
+
+            <label class="field-label" for="outputDevice">Saida</label>
+            <select id="outputDevice"></select>
+
+            <div class="slider-row">
+              <label for="micGain">Ganho</label>
+              <input id="micGain" type="range" min="0" max="200" value="100">
+              <output id="micGainValue" for="micGain">100%</output>
+            </div>
+
+            <div class="slider-row">
+              <label for="micDelay">Atraso</label>
+              <input id="micDelay" type="range" min="0" max="180" value="0">
+              <output id="micDelayValue" for="micDelay">0 ms</output>
+            </div>
+
+            <canvas id="micMeter" width="640" height="120" aria-label="Nivel do microfone"></canvas>
+            <p class="audio-note" id="audioNote">Use a saida padrao do Windows para escolher o alto-falante.</p>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
